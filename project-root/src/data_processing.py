@@ -15,14 +15,14 @@ def process_chunk(chunk):
     # Drop rows with missing values in critical columns
     chunk = chunk.dropna(subset=['Login Timestamp', 'User ID', 'Round-Trip Time [ms]', 'IP Address', 'Country'])
 
-    # Convert 'Login Timestamp' to datetime format using .loc[] to avoid SettingWithCopyWarning
-    chunk.loc[:, 'Login Timestamp'] = pd.to_datetime(chunk['Login Timestamp'], errors='coerce')
+    # Convert 'Login Timestamp' to datetime format
+    chunk['Login Timestamp'] = pd.to_datetime(chunk['Login Timestamp'], errors='coerce')
 
     # Drop rows where 'Login Timestamp' couldn't be converted
     chunk = chunk.dropna(subset=['Login Timestamp'])
 
     # Convert 'Round-Trip Time [ms]' to numeric type
-    chunk.loc[:, 'Round-Trip Time [ms]'] = pd.to_numeric(chunk['Round-Trip Time [ms]'], errors='coerce')
+    chunk['Round-Trip Time [ms]'] = pd.to_numeric(chunk['Round-Trip Time [ms]'], errors='coerce')
 
     # Normalize 'Round-Trip Time [ms]' using StandardScaler
     scaler = StandardScaler()

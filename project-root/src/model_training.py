@@ -1,112 +1,50 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-import joblib
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.utils import to_categorical
 
-def load_data(file_path):
-    """
-    Load the processed data from a CSV file.
+# Load the processed data
+file_path = '/Users/kaushalkento/Desktop/GroupProject./CAPTCHARefinement./project-root/data/processed1_rba-dataset.csv'
+data = pd.read_csv(file_path)
 
-    Parameters:
-    - file_path: Path to the processed CSV file.
+# Print columns to verify
+print("Available columns:", data.columns)
 
-    Returns:
-    - DataFrame with the loaded data.
-    """
-    return pd.read_csv(file_path)
+# Define feature columns and target column
+feature_columns = ['Round-Trip Time [ms]', 'Country', 'Browser Name and Version']
+target_column = 'Is Attack IP'  # Example target column, adjust as needed
 
-def preprocess_data(df):
-    """
-    Prepare data for training by separating features and target labels.
+# Extract features and target
+X = data[feature_columns]
+y = data[target_column]
 
-    Parameters:
-    - df: DataFrame containing the processed data.
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-    Returns:
-    - X: Features DataFrame.
-    - y: Target labels.
-    """
-    # Define features and target label
-    X = df.drop(columns=['Is Attack IP'])  # Modify target column as needed
-    y = df['Is Attack IP']
+# Normalize features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
 
-    return X, y
+# Convert target variable to categorical if needed
+y_train = to_categorical(y_train)
+y_test = to_categorical(y_test)
 
-def train_model(X_train, y_train):
-    """
-    Train a machine learning model on the provided training data.
+# Define the neural network model
+model = Sequential()
+model.add(Dense(64, input_dim=X_train.shape[1], activation='relu'))
+model.add(Dense(32, activation='relu'))
+model.add(Dense(2, activation='softmax'))  # Assuming binary classification
 
-    Parameters:
-    - X_train: Features for training.
-    - y_train: Labels for training.
+# Compile the model
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
-    Returns:
-    - Trained model.
-    """
-    # Initialize the model (RandomForestClassifier is used as an example)
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
+# Train the model
+history = model.fit(X_train, y_train, epochs=20, batch_size=32, validation_split=0.2)
 
-    # Train the model
-    model.fit(X_train, y_train)
-
-    return model
-
-def evaluate_model(model, X_test, y_test):
-    """
-    Evaluate the trained model on the test data.
-
-    Parameters:
-    - model: The trained model.
-    - X_test: Features for testing.
-    - y_test: Labels for testing.
-    """
-    # Make predictions
-    y_pred = model.predict(X_test)
-
-    # Calculate accuracy
-    accuracy = accuracy_score(y_test, y_pred)
-    print(f"Accuracy: {accuracy:.4f}")
-
-    # Print classification report
-    print("Classification Report:")
-    print(classification_report(y_test, y_pred))
-
-    # Print confusion matrix
-    print("Confusion Matrix:")
-    print(confusion_matrix(y_test, y_pred))
-
-def save_model(model, file_path):
-    """
-    Save the trained model to a file.
-
-    Parameters:
-    - model: The trained model.
-    - file_path: Path to save the model.
-    """
-    joblib.dump(model, file_path)
-    print(f"Model saved to {file_path}")
-
-def main():
-    # Define file paths
-    processed_file_path = '/Users/kaushalkento/Desktop/GroupProject./CAPTCHARefinement./project-root/data/processed_rba-dataset.csv'
-    model_file_path = '/Users/kaushalkento/Desktop/GroupProject./CAPTCHARefinement./project-root/models/rba_model.pkl'
-
-    # Load and preprocess data
-    df = load_data(processed_file_path)
-    X, y = preprocess_data(df)
-
-    # Split the data into training and test sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # Train the model
-    model = train_model(X_train, y_train)
-
-    # Evaluate the model
-    evaluate_model(model, X_test, y_test)
-
-    # Save the trained model
-    save_model(model, model_file_path)
-
-if __name__ == "__main__":
-    main()
+# Evaluate the model
+loss, accuracy = model.evaluate(X_test, y_test)
+print(f"Test Loss: {loss}")
+print(f"Test Accuracy: {accuracy}")
