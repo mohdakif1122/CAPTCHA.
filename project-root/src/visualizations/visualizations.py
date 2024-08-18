@@ -1,11 +1,9 @@
-# File: project-root/src/visualizations/visualizations.py
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Load the processed data
-file_path = '/Users/kaushalkento/Desktop/GroupProject./CAPTCHARefinement./project-root/data/processed_rba-dataset.csv'
+file_path = '/Users/kaushalkento/Desktop/GroupProject./CAPTCHARefinement./project-root/data/processed1_rba-dataset.csv'
 data = pd.read_csv(file_path)
 
 # Define a function to save and show plots
@@ -26,7 +24,7 @@ save_and_show_plot(plt.gcf(), 'distribution_round_trip_time.png')
 
 # Distribution of 'Login Successful'
 plt.figure(figsize=(8, 6))
-sns.countplot(x='Login Successful', data=data, palette='viridis')
+sns.countplot(x='Login Successful', data=data, hue='Login Successful', palette='viridis', legend=False)
 plt.title('Login Success vs. Failure')
 plt.xlabel('Login Successful')
 plt.ylabel('Count')
@@ -34,7 +32,7 @@ save_and_show_plot(plt.gcf(), 'login_success_vs_failure.png')
 
 # Distribution of 'Is Attack IP'
 plt.figure(figsize=(8, 6))
-sns.countplot(x='Is Attack IP', data=data, palette='viridis')
+sns.countplot(x='Is Attack IP', data=data, hue='Is Attack IP', palette='viridis', legend=False)
 plt.title('Attack IP Distribution')
 plt.xlabel('Is Attack IP')
 plt.ylabel('Count')
@@ -42,7 +40,7 @@ save_and_show_plot(plt.gcf(), 'attack_ip_distribution.png')
 
 # Distribution of 'Is Account Takeover'
 plt.figure(figsize=(8, 6))
-sns.countplot(x='Is Account Takeover', data=data, palette='viridis')
+sns.countplot(x='Is Account Takeover', data=data, hue='Is Account Takeover', palette='viridis', legend=False)
 plt.title('Account Takeover Distribution')
 plt.xlabel('Is Account Takeover')
 plt.ylabel('Count')
@@ -50,7 +48,7 @@ save_and_show_plot(plt.gcf(), 'account_takeover_distribution.png')
 
 # Boxplot of 'Round-Trip Time [ms]' by 'Is Attack IP'
 plt.figure(figsize=(12, 6))
-sns.boxplot(x='Is Attack IP', y='Round-Trip Time [ms]', data=data, palette='Set2')
+sns.boxplot(x='Is Attack IP', y='Round-Trip Time [ms]', data=data, hue='Is Attack IP', palette='Set2', legend=False)
 plt.title('Round-Trip Time [ms] by Attack IP')
 plt.xlabel('Is Attack IP')
 plt.ylabel('Round-Trip Time [ms]')
@@ -58,7 +56,7 @@ save_and_show_plot(plt.gcf(), 'round_trip_time_by_attack_ip.png')
 
 # Boxplot of 'Round-Trip Time [ms]' by 'Is Account Takeover'
 plt.figure(figsize=(12, 6))
-sns.boxplot(x='Is Account Takeover', y='Round-Trip Time [ms]', data=data, palette='Set2')
+sns.boxplot(x='Is Account Takeover', y='Round-Trip Time [ms]', data=data, hue='Is Account Takeover', palette='Set2', legend=False)
 plt.title('Round-Trip Time [ms] by Account Takeover')
 plt.xlabel('Is Account Takeover')
 plt.ylabel('Round-Trip Time [ms]')

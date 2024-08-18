@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from sklearn.preprocessing import StandardScaler
 
 def process_chunk(chunk):
     """
@@ -14,16 +15,34 @@ def process_chunk(chunk):
     # Drop rows with missing values in critical columns
     chunk = chunk.dropna(subset=['Login Timestamp', 'User ID', 'Round-Trip Time [ms]', 'IP Address', 'Country'])
 
-    # Convert 'Login Timestamp' to datetime format using .loc
+    # Convert 'Login Timestamp' to datetime format using .loc[] to avoid SettingWithCopyWarning
     chunk.loc[:, 'Login Timestamp'] = pd.to_datetime(chunk['Login Timestamp'], errors='coerce')
 
-    # Convert 'Round-Trip Time [ms]' to numeric type using .loc
+    # Drop rows where 'Login Timestamp' couldn't be converted
+    chunk = chunk.dropna(subset=['Login Timestamp'])
+
+    # Convert 'Round-Trip Time [ms]' to numeric type
     chunk.loc[:, 'Round-Trip Time [ms]'] = pd.to_numeric(chunk['Round-Trip Time [ms]'], errors='coerce')
 
-    # Convert 'Login Successful', 'Is Attack IP', 'Is Account Takeover' to boolean using .loc
-    chunk.loc[:, 'Login Successful'] = chunk['Login Successful'].astype(bool)
-    chunk.loc[:, 'Is Attack IP'] = chunk['Is Attack IP'].astype(bool)
-    chunk.loc[:, 'Is Account Takeover'] = chunk['Is Account Takeover'].astype(bool)
+    # Normalize 'Round-Trip Time [ms]' using StandardScaler
+    scaler = StandardScaler()
+    chunk['Round-Trip Time [ms]'] = scaler.fit_transform(chunk[['Round-Trip Time [ms]']])
+
+    # Convert categorical columns to category dtype for better performance
+    chunk['Country'] = chunk['Country'].astype('category')
+    chunk['Browser Name and Version'] = chunk['Browser Name and Version'].astype('category')
+
+    # Encode categorical columns
+    chunk['Country'] = chunk['Country'].cat.codes
+    chunk['Browser Name and Version'] = chunk['Browser Name and Version'].cat.codes
+
+    # Convert 'Login Successful', 'Is Attack IP', 'Is Account Takeover' to boolean
+    chunk['Login Successful'] = chunk['Login Successful'].astype(bool)
+    chunk['Is Attack IP'] = chunk['Is Attack IP'].astype(bool)
+    chunk['Is Account Takeover'] = chunk['Is Account Takeover'].astype(bool)
+
+    # Drop unnecessary columns (modify as needed)
+    chunk = chunk.drop(columns=['IP Address', 'User Agent String'])
 
     return chunk
 
@@ -32,8 +51,8 @@ def main():
     Main function to load, process, and save the data.
     """
     # Define file paths
-    file_path = ''
-    processed_file_path = ''
+    file_path = '/Users/kaushalkento/Desktop/GroupProject./CAPTCHARefinement./project-root/data/rba-dataset.csv'
+    processed_file_path = '/Users/kaushalkento/Desktop/GroupProject./CAPTCHARefinement./project-root/data/processed1_rba-dataset.csv'
 
     # Ensure the 'data' directory exists
     os.makedirs(os.path.dirname(processed_file_path), exist_ok=True)
@@ -49,7 +68,6 @@ def main():
     # Initialize an empty DataFrame to hold processed data
     processed_data = pd.DataFrame()
 
-    # Process the CSV file in chunks
     try:
         for chunk in pd.read_csv(file_path, chunksize=chunk_size):
             print(f"Processing chunk of size {len(chunk)}")
