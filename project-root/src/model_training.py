@@ -48,3 +48,9 @@ history = model.fit(X_train, y_train, epochs=20, batch_size=32, validation_split
 loss, accuracy = model.evaluate(X_test, y_test)
 print(f"Test Loss: {loss}")
 print(f"Test Accuracy: {accuracy}")
+
+# Define the path to save the model
+model_save_path = '/Users/kaushalkento/Desktop/GroupProject./CAPTCHARefinement./project-root/models/trained_model.h5'
+
+# Save the trained model
+model.save(model_save_path)
